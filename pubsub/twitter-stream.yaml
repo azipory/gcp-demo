@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: twitter-stream
+  labels:
+    name: twitter-stream
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: twitter-stream
+    spec:
+      containers:
+      - name: twitter-to-pubsub
+        image: gcr.io/google-samples/pubsub-bq-pipe:v2
+        env:
+        - name: PROCESSINGSCRIPT
+          value: twitter-to-pubsub
+        # Change this to your pubsub topic
+        - name: PUBSUB_TOPIC
+          value: projects/openshift-bigquery-demo/topics/new_tweets
+        # Change the following four settings to your twitter credentials
+        # information.
+        - name: CONSUMERKEY
+          value: RGofqoxaxWLw9bocVaoOVSYyu
+        - name: CONSUMERSECRET
+          value: lbdXgQaeFKVNsl6n6t5qyRipap4aK38XvEXLbTgaq5Jj1swxeV
+        - name: ACCESSTOKEN
+          value: 310426257-ABGQRSzDLRWqvSBS9D0rReopnoEtNp3fchzqJ4fF
+        - name: ACCESSTOKENSEC
+          value: l3AaDppPQahx3UE53bYewK5CpITkxJHzLCgQSCDvOxYiF
+        - name: TWSTREAMMODE
+          value: filter
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/secretspath/google-services.json
+        volumeMounts:
+        - name: secrets
+          mountPath: /etc/secretspath
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: google-services-secret
